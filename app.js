@@ -19,8 +19,13 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(helmet());
-app.use(cors());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3001',
+  credentials: true
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -28,17 +33,26 @@ app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 
 // Routes
-app.use('/auth', authRoutes);
-app.use('/albums', albumRoutes);
-app.use('/albums', imageRoutes);
-app.use('/trash', trashRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/albums', albumRoutes);
+app.use('/api/albums', imageRoutes);
+app.use('/api/trash', trashRoutes);
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ 
     success: true, 
     message: 'KaviosPix API is running',
     timestamp: new Date().toISOString()
+  });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'KaviosPix API Server',
+    version: '1.0.0'
   });
 });
 
@@ -51,16 +65,22 @@ app.use((error, req, res, next) => {
   });
 });
 
-// 404 handler - FIXED: Use proper route pattern
-app.use((req, res) => {
+// 404 handler
+app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
-    message: 'Route not found'
+    message: 'API route not found'
   });
 });
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`KaviosPix server running on port ${PORT}`);
-});
+// Vercel serverless compatibility
+module.exports = app;
+
+// Only listen if not in Vercel environment
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`KaviosPix server running on port ${PORT}`);
+  });
+}
