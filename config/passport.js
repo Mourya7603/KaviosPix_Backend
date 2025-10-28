@@ -4,8 +4,8 @@ const User = require('../models/User');
 const { v4: uuidv4 } = require('uuid');
 
 const callbackURL = process.env.NODE_ENV === 'production' 
-  ? `${process.env.VERCEL_URL || 'https://your-app.vercel.app'}/api/auth/google/callback`
-  : "http://localhost:3000/api/auth/google/callback";
+  ? 'https://kavios-pix-backend-blond.vercel.app/auth/google/callback'
+  : 'http://localhost:3000/auth/google/callback';
 
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
