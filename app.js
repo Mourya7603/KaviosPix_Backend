@@ -28,13 +28,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/albums', albumRoutes);
-app.use('/api/albums', imageRoutes);
-app.use('/api/trash', trashRoutes);
+app.use('/auth', authRoutes);
+app.use('/albums', albumRoutes);
+app.use('/albums', imageRoutes);
+app.use('/trash', trashRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/health', (req, res) => {
   res.json({ 
     success: true, 
     message: 'KaviosPix API is running',
@@ -42,49 +42,25 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Root endpoint
-app.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'KaviosPix API Server',
-    version: '1.0.0',
-    endpoints: {
-      auth: '/api/auth',
-      albums: '/api/albums',
-      trash: '/api/trash'
-    }
-  });
-});
-
 // Error handling middleware
 app.use((error, req, res, next) => {
-  console.error('Server Error:', error);
+  console.error('Error:', error);
   res.status(500).json({
     success: false,
-    message: process.env.NODE_ENV === 'production' 
-      ? 'Internal server error' 
-      : error.message
+    message: 'Internal server error'
   });
 });
 
-// 404 handler - FIXED: Remove the '*' parameter
+// 404 handler - FIXED: Use proper route pattern
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: 'API route not found',
-    path: req.path
+    message: 'Route not found'
   });
 });
 
 const PORT = process.env.PORT || 3000;
 
-// Export for Vercel serverless
-module.exports = app;
-
-// Only listen if not in Vercel environment
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`KaviosPix server running on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  });
-}
+app.listen(PORT, () => {
+  console.log(`KaviosPix server running on port ${PORT}`);
+});
