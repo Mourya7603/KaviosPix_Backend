@@ -19,13 +19,8 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3001',
-  credentials: true
-}));
+app.use(helmet());
+app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -52,35 +47,44 @@ app.get('/', (req, res) => {
   res.json({
     success: true,
     message: 'KaviosPix API Server',
-    version: '1.0.0'
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      albums: '/api/albums',
+      trash: '/api/trash'
+    }
   });
 });
 
 // Error handling middleware
 app.use((error, req, res, next) => {
-  console.error('Error:', error);
+  console.error('Server Error:', error);
   res.status(500).json({
     success: false,
-    message: 'Internal server error'
+    message: process.env.NODE_ENV === 'production' 
+      ? 'Internal server error' 
+      : error.message
   });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
+// 404 handler - FIXED: Remove the '*' parameter
+app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: 'API route not found'
+    message: 'API route not found',
+    path: req.path
   });
 });
 
 const PORT = process.env.PORT || 3000;
 
-// Vercel serverless compatibility
+// Export for Vercel serverless
 module.exports = app;
 
 // Only listen if not in Vercel environment
-if (process.env.NODE_ENV !== 'production' || process.env.VERCEL !== '1') {
+if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`KaviosPix server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   });
 }
