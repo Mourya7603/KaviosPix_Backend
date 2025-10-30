@@ -154,23 +154,23 @@ const handleGoogleAuth = async (req, res) => {
       });
     }
 
-    // For browser - redirect to React frontend with token
-    const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
+    // For browser - redirect to React frontend ROOT PATH with token
+    const frontendURL = process.env.FRONTEND_URL || 'https://kavios-pix-frontend.vercel.app';
     
-    // Use proper URL encoding
-    const redirectURL = `${frontendURL}/auth/success?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
+    // REDIRECT TO ROOT PATH (/) instead of /auth/success
+    const redirectURL = `${frontendURL}/?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
     
-    console.log('Redirecting to:', redirectURL);
+    console.log('🔐 OAuth Success - Redirecting to root with token');
+    console.log('📍 Redirect URL:', redirectURL);
     res.redirect(redirectURL);
 
   } catch (error) {
     console.error('Auth error:', error);
-    const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const redirectURL = `${frontendURL}/auth/error?message=Authentication+failed`;
+    const frontendURL = process.env.FRONTEND_URL || 'https://kavios-pix-frontend.vercel.app';
+    const redirectURL = `${frontendURL}/login?error=Authentication+failed`;
     res.redirect(redirectURL);
   }
 };
-
 // Keep existing functions...
 const getCurrentUser = async (req, res) => {
   try {
