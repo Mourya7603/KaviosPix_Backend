@@ -173,14 +173,15 @@ const deleteAlbum = async (req, res) => {
   }
 };
 
-// Get All Albums
+// Get All Albums - EXCLUDE DELETED ALBUMS
 const getAlbums = async (req, res) => {
   try {
     const albums = await Album.find({
       $or: [
         { ownerId: req.user.userId },
         { 'sharedWith.email': req.user.email }
-      ]
+      ],
+      isDeleted: { $ne: true } // ← EXCLUDE DELETED ALBUMS
     }).sort({ createdAt: -1 });
 
     res.json({
