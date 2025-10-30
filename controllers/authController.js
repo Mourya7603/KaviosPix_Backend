@@ -142,10 +142,10 @@ const handleGoogleAuth = async (req, res) => {
       email: req.user.email,
       name: req.user.name,
       avatar: req.user.avatar,
-      emailVerified: true // Google users are automatically verified
+      emailVerified: true
     };
 
-    // For API clients
+    // For API clients - return JSON
     if (req.headers.accept && req.headers.accept.includes('application/json')) {
       return res.json({
         success: true,
@@ -156,8 +156,11 @@ const handleGoogleAuth = async (req, res) => {
 
     // For browser - redirect to React frontend with token
     const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const redirectURL = `${frontendURL}/auth/success?token=${encodeURIComponent(token)}&user=${encodeURIComponent(JSON.stringify(userData))}`;
     
+    // Use proper URL encoding
+    const redirectURL = `${frontendURL}/auth/success?token=${token}&user=${encodeURIComponent(JSON.stringify(userData))}`;
+    
+    console.log('Redirecting to:', redirectURL);
     res.redirect(redirectURL);
 
   } catch (error) {
